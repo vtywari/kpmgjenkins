@@ -1,0 +1,108 @@
+
+
+  def jenkinsconnection(hostname, credential,command) 
+  {
+      try{    
+      def remote = [:]
+            remote.name = "node"
+            remote.host = hostname
+            remote.allowAnyHosts = true
+            //def command  = command
+
+          
+
+            withCredentials([sshUserPrivateKey(credentialsId: credential, 
+                      keyFileVariable: 'JENKINS_PRIVATE_KEY', passphraseVariable: '',
+                      usernameVariable: 'USERNAME')]) 
+                      {
+              remote.user = USERNAME
+              remote.identityFile = JENKINS_PRIVATE_KEY
+              def result= sshCommand remote: remote, command: command, failOnError: 'true'.toString().trim()
+              try{
+
+                
+
+              def fileName= "${WORKSPACE}/test.txt"
+              println fileName
+
+
+              //file.newWriter().withWriter
+             // {
+               //  w << mockRequest.requestContent
+               //}
+              
+               File myfilename= new File(fileName)
+               myfilename.createNewFile() 
+               println "file created "
+               myfilename.write(result)                                                         
+               println myfilename.text
+              }
+               catch(Exception ex)
+                {
+            
+                   println("Catching the exception for File Creation " +ex.message);
+
+                }
+
+              
+                      }
+
+              }
+          catch(Exception ex)
+          {
+    
+                      println("Catching the exception " +ex.message);
+  
+          }
+    }
+    def manualconection(hostname, username, password, command )
+    {  
+      try{   
+      def remote = [:]
+            remote.name = "node"
+            remote.host = hostname
+            remote.allowAnyHosts = true
+            //def command  = command
+
+            
+            remote.user = username
+            remote.password = password
+            def result= sshCommand remote: remote, command: command, failOnError: 'true'
+
+            try{
+              def fileName= "${WORKSPACE}/test1.txt"
+              println fileName
+              
+               File myfilename= new File(fileName)
+               myfilename.createNewFile() 
+               println "file created "
+               myfilename.write(result)                                                         
+               println myfilename.text
+              }
+               catch(Exception ex)
+                {
+            
+                   println("Catching the exception for File Creation " +ex.message);
+
+                }
+
+            }
+
+            catch(Exception ex){
+
+              println("Catching the exception " +ex.message)
+            }
+    }
+
+  pipeline {
+    agent any
+    stages {
+      stage('Deploy Using SSH Steps') {
+        steps {
+              jenkinsconnection("192.168.50.16","sshuser", "df -h")
+              //manualconection("192.168.50.16","root","redhat","ls -lrth")
+              
+        }
+      } 
+    }
+    }
